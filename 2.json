@@ -1,0 +1,16 @@
+{
+    "web": {
+        "client_id": "79639535084-e26ii5t83f6re41c0pp1suvdgoio8mc3.apps.googleusercontent.com",
+        "project_id": "manifest-altar-447018-d6",
+        "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+        "token_uri": "https://oauth2.googleapis.com/token",
+        "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+        "client_secret": "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",
+        "redirect_uris": [
+            "http://localhost:8000"
+        ],
+        "javascript_origins": [
+            "http://localhost:3000"
+        ]
+    }
+}
