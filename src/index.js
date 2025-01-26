@@ -67,7 +67,7 @@ app.post('/api/message', async (req, res) => {
   }
 });
 
-app.post("/webhook", async (req, res) => {
+app.post("/api/webhook", async (req, res) => {
   const query = req.body.queryResult.queryText;
 
   try {
