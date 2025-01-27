@@ -25,45 +25,46 @@ app.use(upload.none());
 app.use('/api/materi', materiRoutes);
 
 // Handler untuk menerima pesan dan mengirim ke Dialogflow
+// Dialogflow API Route
 app.post('/api/message', async (req, res) => {
-  const message = req.body.message;
+  const message = req.body.message; // Pesan yang dikirim dari pengguna
 
   if (!message) {
-    return res.status(400).json({ error: 'Field pesan diperlukan' });
+    return res.status(400).json({ error: 'Message field is required' });
   }
 
-  const projectId = process.env.DIALOGFLOW_PROJECT_ID;
+  const projectId = 'master-plateau-435214-k5'; // ID project Dialogflow
   const sessionClient = new dialogflow.SessionsClient({
-    credentials: {
-      client_email: process.env.DIALOGFLOW_CLIENT_EMAIL,
-      private_key: process.env.DIALOGFLOW_PRIVATE_KEY.replace(/\\n/g, '\n'),
-    }
+    credentials: require('./dialogflow-credentials.json'), // Kredensial dari file JSON
   });
 
-  const sessionPath = sessionClient.projectAgentSessionPath(projectId, 'unique-session-id');
+  const sessionPath = sessionClient.projectAgentSessionPath(projectId, 'unique-session-id'); // Path sesi Dialogflow
 
   const request = {
     session: sessionPath,
     queryInput: {
       text: {
-        text: message,
-        languageCode: 'en',
+        text: message, // Pesan pengguna
+        languageCode: 'en', // Kode bahasa
       },
     },
   };
 
   try {
-    const responses = await sessionClient.detectIntent(request);
-    const result = responses[0]?.queryResult;
+    const responses = await sessionClient.detectIntent(request); // Kirim request ke Dialogflow
+    const result = responses[0]?.queryResult; // Ambil hasil dari response
 
     if (result) {
+      // Jika ada hasil dari Dialogflow, kirimkan response
       res.status(200).json({ response: result.fulfillmentText });
     } else {
-      res.status(500).json({ error: 'Respons Dialogflow kosong' });
+      // Jika tidak ada hasil
+      res.status(500).json({ error: 'Dialogflow response is empty' });
     }
   } catch (error) {
-    console.error('Error permintaan API Dialogflow:', error);
-    res.status(500).json({ error: 'Kesalahan pada server' });
+    // Tangani jika terjadi error
+    console.error('Dialogflow API request error:', error);
+    res.status(500).json({ error: 'Internal Server Error' });
   }
 });
 
