@@ -85,18 +85,25 @@ app.post("/api/webhook", async (req, res) => {
   const userQuestion = req.body.queryResult.queryText; // Ambil pertanyaan dari pengguna
 
   try {
-    // Kirim pertanyaan ke OpenAI dan dapatkan responsnya
+    // Kirim pertanyaan ke OpenAI dan dapatkan responsnya dengan streaming
     const chatCompletion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
       messages: [
         systemMessage, // Pesan sistem untuk konteks
         { role: "user", content: userQuestion },
       ],
+      stream: true,  // Enable streaming response
     });
 
-    const aiResponse = chatCompletion.choices[0].message.content; // Ambil jawaban dari OpenAI
+    // Handle streaming output
+    let aiResponse = '';
+    for await (const chunk of chatCompletion) {
+      if (chunk.choices && chunk.choices[0] && chunk.choices[0].delta) {
+        aiResponse += chunk.choices[0].delta.content || ''; // Collect streamed content
+      }
+    }
 
-    // Kembalikan hasil ke Dialogflow
+    // Kembalikan hasil ke Dialogflow setelah streaming selesai
     res.json({
       fulfillmentText: aiResponse,
     });
@@ -107,6 +114,7 @@ app.post("/api/webhook", async (req, res) => {
     });
   }
 });
+
 app.listen(port, () => {
   console.log(`Server berjalan di http://localhost:${port}`);
 });
