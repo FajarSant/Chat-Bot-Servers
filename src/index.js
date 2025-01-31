@@ -5,9 +5,8 @@ const multer = require('multer');
 const dialogflow = require('@google-cloud/dialogflow');
 const cors = require('cors');
 const axios = require('axios');
-
-const { OpenAI } = require("openai");
 const path = require('path');
+const { OpenAI } = require("openai");
 
 const materiRoutes = require('./routes/materiroutes');
 
@@ -28,12 +27,6 @@ app.use(bodyParser.json());
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage: storage });
-
-const systemMessage = {
-  role: "system",
-  content:
-    "Anda adalah asisten AI untuk membantu siswa yang mengambil mata pelajaran Informatika kelas X SMK. Materi yang dibahas antara lain:1.Berpikir komputasional, 2.Teknologi Informasi dan Komunikasi, 3.Sistem Komputer, 4.Jaringan Komputer dan Internet, 5.Analisis Data, 6.Algoritma dan pemograman, 7.Dampak Sosial Informatika, 8.Praktik Lintas Bidang. Berikan jawaban detail dan jelas jika ada pertanyaan terkait itu. Jika pertanyaan di luar topik itu, beri tahu bahwa kau adalah asisten AI yang dirancang untuk membantu belajar tentang: Berpikir komputasional, Teknologi Informasi dan Komunikasi, Sistem Komputer, Jaringan Komputer dan Internet, Analisis Data, Algoritma dan pemograman, Dampak Sosial Informatika, Praktik Lintas Bidang dan arahakan agar pengguna bertanya ke topik terkait itu",
-};
 
 app.use(upload.none());
 app.use('/api/materi', materiRoutes);
@@ -82,7 +75,13 @@ app.post('/api/message', async (req, res) => {
   }
 });
 
-app.post("api/webhook", async (req, res) => {
+
+const systemMessage = {
+  role: "system",
+  content:
+    "Anda adalah asisten AI untuk membantu siswa yang mengambil mata pelajaran Informatika kelas X SMK. Materi yang dibahas antara lain:1.Berpikir komputasional, 2.Teknologi Informasi dan Komunikasi, 3.Sistem Komputer, 4.Jaringan Komputer dan Internet, 5.Analisis Data, 6.Algoritma dan pemograman, 7.Dampak Sosial Informatika, 8.Praktik Lintas Bidang. Berikan jawaban detail dan jelas jika ada pertanyaan terkait itu. Jika pertanyaan di luar topik itu, beri tahu bahwa kau adalah asisten AI yang dirancang untuk membantu belajar tentang: Berpikir komputasional, Teknologi Informasi dan Komunikasi, Sistem Komputer, Jaringan Komputer dan Internet, Analisis Data, Algoritma dan pemograman, Dampak Sosial Informatika, Praktik Lintas Bidang dan arahakan agar pengguna bertanya ke topik terkait itu",
+};
+app.post("/api/webhook", async (req, res) => {
   const userQuestion = req.body.queryResult.queryText; // Ambil pertanyaan dari pengguna
 
   try {
@@ -108,7 +107,6 @@ app.post("api/webhook", async (req, res) => {
     });
   }
 });
-
 app.listen(port, () => {
   console.log(`Server berjalan di http://localhost:${port}`);
 });
