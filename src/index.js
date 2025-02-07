@@ -31,45 +31,41 @@ const upload = multer({ storage: storage });
 app.use(upload.none());
 app.use('/api/materi', materiRoutes);
 
-// Handler untuk menerima pesan dan mengirim ke Dialogflow
-// Dialogflow API Route
+
 app.post('/api/message', async (req, res) => {
-  const message = req.body.message; // Pesan yang dikirim dari pengguna
+  const message = req.body.message; 
 
   if (!message) {
     return res.status(400).json({ error: 'Message field is required' });
   }
 
-  const projectId = 'master-plateau-435214-k5'; // ID project Dialogflow
+  const projectId = 'master-plateau-435214-k5'; 
   const sessionClient = new dialogflow.SessionsClient({
-    credentials: require('./dialogflow-credentials.json'), // Kredensial dari file JSON
+    credentials: require('./dialogflow-credentials.json'), 
   });
 
-  const sessionPath = sessionClient.projectAgentSessionPath(projectId, 'unique-session-id'); // Path sesi Dialogflow
+  const sessionPath = sessionClient.projectAgentSessionPath(projectId, 'unique-session-id'); 
 
   const request = {
     session: sessionPath,
     queryInput: {
       text: {
-        text: message, // Pesan pengguna
-        languageCode: 'en', // Kode bahasa
+        text: message, 
+        languageCode: 'en',
       },
     },
   };
 
   try {
-    const responses = await sessionClient.detectIntent(request); // Kirim request ke Dialogflow
-    const result = responses[0]?.queryResult; // Ambil hasil dari response
+    const responses = await sessionClient.detectIntent(request); 
+    const result = responses[0]?.queryResult; 
 
     if (result) {
-      // Jika ada hasil dari Dialogflow, kirimkan response
       res.status(200).json({ response: result.fulfillmentText });
     } else {
-      // Jika tidak ada hasil
       res.status(500).json({ error: 'Dialogflow response is empty' });
     }
   } catch (error) {
-    // Tangani jika terjadi error
     console.error('Dialogflow API request error:', error);
     res.status(500).json({ error: 'Internal Server Error' });
   }
@@ -82,28 +78,25 @@ const systemMessage = {
     "Anda adalah asisten AI untuk membantu siswa yang mengambil mata pelajaran Informatika kelas X SMK. Materi yang dibahas antara lain:1.Berpikir komputasional, 2.Teknologi Informasi dan Komunikasi, 3.Sistem Komputer, 4.Jaringan Komputer dan Internet, 5.Analisis Data, 6.Algoritma dan pemograman, 7.Dampak Sosial Informatika, 8.Praktik Lintas Bidang. Berikan jawaban detail dan jelas jika ada pertanyaan terkait itu. Jika pertanyaan di luar topik itu, beri tahu bahwa kau adalah asisten AI yang dirancang untuk membantu belajar tentang: Berpikir komputasional, Teknologi Informasi dan Komunikasi, Sistem Komputer, Jaringan Komputer dan Internet, Analisis Data, Algoritma dan pemograman, Dampak Sosial Informatika, Praktik Lintas Bidang dan arahakan agar pengguna bertanya ke topik terkait itu",
 };
 app.post("/api/webhook", async (req, res) => {
-  const userQuestion = req.body.queryResult.queryText; // Ambil pertanyaan dari pengguna
+  const userQuestion = req.body.queryResult.queryText;
 
   try {
-    // Kirim pertanyaan ke OpenAI dan dapatkan responsnya dengan streaming
     const chatCompletion = await openai.chat.completions.create({
       model: "gpt-3.5-turbo",
       messages: [
-        systemMessage, // Pesan sistem untuk konteks
+        systemMessage,
         { role: "user", content: userQuestion },
       ],
-      stream: true,  // Enable streaming response
+      stream: true, 
     });
 
-    // Handle streaming output
     let aiResponse = '';
     for await (const chunk of chatCompletion) {
       if (chunk.choices && chunk.choices[0] && chunk.choices[0].delta) {
-        aiResponse += chunk.choices[0].delta.content || ''; // Collect streamed content
+        aiResponse += chunk.choices[0].delta.content || '';
       }
     }
 
-    // Kembalikan hasil ke Dialogflow setelah streaming selesai
     res.json({
       fulfillmentText: aiResponse,
     });
