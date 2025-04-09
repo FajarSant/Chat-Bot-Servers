@@ -17,7 +17,7 @@ const port = process.env.PORT || 8000;
 app.use(cors());
 
 const API_KEY =
-  "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"; // Ganti dengan API Key Anda
+  "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"; 
 const openai = new OpenAI({
   apiKey: API_KEY,
 });
