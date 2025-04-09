@@ -17,7 +17,7 @@ const port = process.env.PORT || 8000;
 app.use(cors());
 
 const API_KEY =
-  ""; 
+  "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"; 
 const openai = new OpenAI({
   apiKey: API_KEY,
 });
